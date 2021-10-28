@@ -6,3 +6,7 @@ provider "aws" {
 module "vpc" {
   source = "../modules/aws_network"
 }
+
+module "ecr" {
+  source = "../modules/aws_ecr"
+}
