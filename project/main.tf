@@ -3,10 +3,16 @@ provider "aws" {
   profile = "default"
 }
 
-module "vpc" {
+module "vpc-dev" {
   source = "../modules/aws_network"
+  env = "dev"
 }
 
-module "ecr" {
-  source = "../modules/aws_ecr"
+module "vpc-prod" {
+  source = "../modules/aws_network"
+  env = "prod"
 }
+
+#module "ecr" {
+#  source = "../modules/aws_ecr"
+#}

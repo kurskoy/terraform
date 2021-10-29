@@ -3,14 +3,14 @@ data "aws_availability_zones" "available" {}
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
   tags = {
-    Name = "vpc"
+    Name = "${var.env}-vpc"
   }
 }
 
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "igw"
+    Name = "${var.env}-igw"
   }
 }
 
@@ -18,11 +18,11 @@ resource "aws_internet_gateway" "main" {
 resource "aws_subnet" "public_subnets" {
   count                   = var.az_count
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = element(var.public_subnet_cidr, count.index)
+  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
   tags = {
-    Name = "public-${count.index + 1}"
+    Name = "${var.env}-public"
   }
 }
 
@@ -38,7 +38,7 @@ resource "aws_eip" "nat" {
   vpc   = true
   depends_on = [aws_internet_gateway.main]
   tags = {
-    Name = "eip"
+    Name = "${var.env}-eip"
   }
 }
 
@@ -47,7 +47,7 @@ resource "aws_nat_gateway" "nat" {
   allocation_id = element(aws_eip.nat[*].id, count.index)
   subnet_id     = element(aws_subnet.public_subnets[*].id, count.index)
   tags = {
-    Name = "nat-gw-${count.index + 1}"
+    Name = "${var.env}-nat-gw"
   }
 }
 
@@ -55,10 +55,10 @@ resource "aws_nat_gateway" "nat" {
 resource "aws_subnet" "private_subnets" {
   count             = var.az_count
   vpc_id            = aws_vpc.main.id
-  cidr_block        = element(var.private_subnet_cidr, count.index)
+  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, var.az_count + count.index)
   availability_zone = data.aws_availability_zones.available.names[count.index]
   tags = {
-    Name = "private-${count.index + 1}"
+    Name = "${var.env}-private"
   }
 }
 
@@ -70,7 +70,7 @@ resource "aws_route_table" "private_subnets" {
     nat_gateway_id = element(aws_nat_gateway.nat[*].id, count.index)
   }
   tags = {
-    Name = "route-private-subnet-${count.index + 1}"
+    Name = "${var.env}-route-private-subnet"
   }
 }
 

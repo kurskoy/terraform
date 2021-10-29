@@ -3,13 +3,14 @@ TAG ?= latest
 #REPOSITORY_REGION ?= eu-west-1
 #APP_NAME ?= flaskapp
 #ENV_NAME ?= dev
-REPO_NAME = python_server #$(REGISTRY_ID).dkr.ecr.$(REPOSITORY_REGION).amazonaws.com/${APP_NAME}-${ENV_NAME}
+REPO_NAME ?= python_server
+#$(REGISTRY_ID).dkr.ecr.$(REPOSITORY_REGION).amazonaws.com/${APP_NAME}-${ENV_NAME}
 
 .PHONY: build
 build:
     #$(MAKE) docker-login
 	docker build -t $(REPO_NAME):$(TAG) .
-    docker run -d -p 8000:8000 $(REPO_NAME):$(TAG)
+	docker run -d -p 8000:8000 $(REPO_NAME):$(TAG)
     #docker push $(REPO_NAME):$(TAG)
 
 #.PHONY: docker-login
