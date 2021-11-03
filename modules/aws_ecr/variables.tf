@@ -1,3 +1,13 @@
+variable "remote_state_bucket" {}
+
+variable "environment" {
+  type = string
+}
+
+variable "app_name" {
+  type = string
+}
+
 locals {
-  ecr_name = python_server_ecr
+  repository_name = format("%s-%s", var.app_name, var.environment)
 }

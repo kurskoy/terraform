@@ -1,3 +1,3 @@
-resource "aws_ecr_repository" "ecr" {
-  name = var.ecr_name
+resource "aws_ecr_repository" "ecr_repository" {
+  name = local.repository_name
 }
