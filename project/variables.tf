@@ -21,3 +21,14 @@ variable "app_name" {
     type = string
     default = "python-server"
 }
+
+variable "image_tag" {
+    type = string
+    default = "latest"
+}
+
+variable "app_count" {
+  description = "Number of docker containers to run"
+  default     = 1
+}
+

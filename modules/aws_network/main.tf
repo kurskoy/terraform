@@ -3,14 +3,14 @@ data "aws_availability_zones" "available" {}
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
   tags = {
-    Name = "${var.env}-vpc"
+    Name = "${var.environment}-vpc"
   }
 }
 
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "${var.env}-igw"
+    Name = "${var.environment}-igw"
   }
 }
 
@@ -22,7 +22,7 @@ resource "aws_subnet" "public_subnets" {
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
   tags = {
-    Name = "${var.env}-public"
+    Name = "${var.environment}-public"
   }
 }
 
@@ -38,7 +38,7 @@ resource "aws_eip" "nat" {
   vpc   = true
   depends_on = [aws_internet_gateway.main]
   tags = {
-    Name = "${var.env}-eip"
+    Name = "${var.environment}-eip"
   }
 }
 
@@ -47,7 +47,7 @@ resource "aws_nat_gateway" "nat" {
   allocation_id = element(aws_eip.nat[*].id, count.index)
   subnet_id     = element(aws_subnet.public_subnets[*].id, count.index)
   tags = {
-    Name = "${var.env}-nat-gw"
+    Name = "${var.environment}-nat-gw"
   }
 }
 
@@ -58,7 +58,7 @@ resource "aws_subnet" "private_subnets" {
   cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, var.az_count + count.index)
   availability_zone = data.aws_availability_zones.available.names[count.index]
   tags = {
-    Name = "${var.env}-private"
+    Name = "${var.environment}-private"
   }
 }
 
@@ -70,7 +70,7 @@ resource "aws_route_table" "private_subnets" {
     nat_gateway_id = element(aws_nat_gateway.nat[*].id, count.index)
   }
   tags = {
-    Name = "${var.env}-route-private-subnet"
+    Name = "${var.environment}-route-private-subnet"
   }
 }
 
