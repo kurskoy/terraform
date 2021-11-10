@@ -1,6 +1,4 @@
 variable "bucket_name" {
-  type        = string
-  description = "S3 Bucket name"
   default     = "python-server"
 }
 
@@ -13,22 +11,26 @@ variable "aws_profile" {
 }
 
 variable "environment" {
-    type = string
     default = "dev"
 }
 
 variable "app_name" {
-    type = string
     default = "python-server"
 }
 
+variable "container_port" {
+  default = 8000
+}
+
 variable "image_tag" {
-    type = string
     default = "latest"
 }
 
 variable "app_count" {
-  description = "Number of docker containers to run"
-  default     = 1
+  default = 2
+}
+
+variable "health_check_path" {
+  default     = "/"
 }
 

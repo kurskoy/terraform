@@ -1,13 +1,11 @@
-# ALB Security Group: Edit to restrict access to the application
-resource "aws_security_group" "lb" {
-  name        = "${var.app_name}-${var.environment}-lb-sg"
-  description = "controls access to the ALB"
+resource "aws_security_group" "alb" {
+  name        = "${var.app_name}-${var.environment}-alb-sg"
   vpc_id      = var.vpc_id
 
   ingress {
     protocol    = "tcp"
-    from_port   = var.app_port
-    to_port     = var.app_port
+    from_port   = 80
+    to_port     = 80
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -17,19 +15,20 @@ resource "aws_security_group" "lb" {
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
   }
+  tags = {
+    Name        = "${var.app_name}-${var.environment}-alb-sg"
+  }
 }
 
-# Traffic to the ECS cluster should only come from the ALB
 resource "aws_security_group" "ecs_tasks" {
   name        = "${var.app_name}-${var.environment}-tasks-sg"
-  description = "allow inbound access from the ALB only"
   vpc_id      = var.vpc_id
 
   ingress {
     protocol        = "tcp"
-    from_port       = var.app_port
-    to_port         = var.app_port
-    security_groups = [aws_security_group.lb.id]
+    from_port       = var.container_port
+    to_port         = var.container_port
+    security_groups = [aws_security_group.alb.id]
   }
 
   egress {
@@ -37,5 +36,8 @@ resource "aws_security_group" "ecs_tasks" {
     from_port   = 0
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name        = "${var.app_name}-${var.environment}-tasks-sg"
   }
 }
