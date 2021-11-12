@@ -14,12 +14,18 @@ variable "container_port" {
   type = string
 }
 
-variable "aws_alb_target_group_arn" {
-  description = "ARN of the alb target group"
-}
-
 variable "app_count" {
   type = string
+}
+
+variable "ecs_task_execution_role_name" {
+  description = "ECS task execution role name"
+  default = "TaskExecutionRole"
+}
+
+variable "ecs_task_role_name" {
+  description = "ECS task role name"
+  default = "TaskRole"
 }
 
 variable "fargate_cpu" {
@@ -32,22 +38,14 @@ variable "fargate_memory" {
   default     = "512"
 }
 
-variable "container_image" {
-  description = "Docker image to be launched"
+variable "ecr_repository_url" {
+  type = string
 }
 
-variable "health_check_path" {
-  default = "/"
+variable "image_tag" {
+  type = string
 }
 
-variable "vpc_id" {
-  description = "VPC id"
-}
-
-variable "private_subnets" {
-  description = "Private Subnets"
-}
-
-variable "ecs_service_security_groups" {
-  description = "Security Groups"
+locals {
+  container_image = format("%s:%s", var.ecr_repository_url, var.image_tag)
 }

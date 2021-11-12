@@ -1,7 +1,18 @@
 resource "aws_ecs_cluster" "main" {
-  name          = "${var.app_name}-${var.environment}-cluster"
-  tags = {
-    Name        = "${var.app_name}-${var.environment}-cluster"
+  name = "${var.app_name}-${var.environment}-cluster"
+}
+
+data "template_file" "app" {
+  template = file("./image.json")
+  vars = {
+    container_image = local.container_image
+    container_port  = var.container_port
+    fargate_cpu     = var.fargate_cpu
+    fargate_memory  = var.fargate_memory
+    aws_region      = var.aws_region
+    environment     = var.environment
+    app_name        = var.app_name
+    image_tag       = var.image_tag
   }
 }
 
@@ -10,23 +21,20 @@ resource "aws_ecs_service" "main" {
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.main.arn
   desired_count   = var.app_count
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
-  health_check_grace_period_seconds  = 60
-  launch_type                        = "FARGATE"
-  scheduling_strategy                = "REPLICA"
+  launch_type     = "FARGATE"
 
   network_configuration {
-    security_groups  = var.ecs_service_security_groups
-    subnets          = var.private_subnets
+    security_groups  = [aws_security_group.ecs_tasks.id]
+    subnets          = aws_subnet.private.*.id
     assign_public_ip = true
   }
 
   load_balancer {
-    target_group_arn = var.aws_alb_target_group_arn
+    target_group_arn = aws_alb_target_group.main.id
     container_name   = "${var.app_name}-${var.environment}-app"
     container_port   = var.container_port
   }
+  depends_on = [aws_alb_listener.http, aws_iam_role.ecs_task_execution_role]
 }
 
 resource "aws_ecs_task_definition" "main" {
@@ -37,26 +45,5 @@ resource "aws_ecs_task_definition" "main" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.fargate_cpu
   memory                   = var.fargate_memory
-  container_definitions    = jsonencode ([{
-    name        = "${var.app_name}-container-${var.environment}"
-    image       = "${var.container_image}:latest"
-    essential   = true
-    portMappings = [{
-      protocol      = "tcp"
-      containerPort = var.container_port
-      hostPort      = var.container_port
-    }]
-    logConfiguration = {
-      logDriver = "awslogs"
-      options = {
-        awslogs-group         = aws_cloudwatch_log_group.main.name
-        awslogs-stream-prefix = "ecs"
-        awslogs-region        = var.aws_region
-      }
-    }
-  }])
-  tags = {
-    Name        = "${var.app_name}-${var.environment}-task"
-  }
+  container_definitions    = data.template_file.app.rendered
 }
-
