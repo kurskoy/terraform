@@ -14,6 +14,6 @@ output "vpc_id" {
   value = module.vpc.vpc_id
 }
 
-output "alb_hostname" {
-  value = module.ecs.alb_hostname
+output "app_url" {
+  value = module.alb.app_url
 }

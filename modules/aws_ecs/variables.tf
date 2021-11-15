@@ -46,6 +46,22 @@ variable "image_tag" {
   type = string
 }
 
+variable "private_subnets" {
+  type = list
+}
+
+variable "aws_alb_target_group" {
+  type = string
+}
+
+variable "security_group" {
+  type = list
+}
+
+variable "aws_alb_listener" {
+  type = string
+}
+
 locals {
   container_image = format("%s:%s", var.ecr_repository_url, var.image_tag)
 }

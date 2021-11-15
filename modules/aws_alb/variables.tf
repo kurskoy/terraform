@@ -11,7 +11,7 @@ variable "public_subnets" {
 }
 
 variable "alb_security_groups" {
-  description = "Security Groups"
+  type = list
 }
 
 variable "vpc_id" {

@@ -3,7 +3,7 @@ resource "aws_ecs_cluster" "main" {
 }
 
 data "template_file" "app" {
-  template = file("./image.json")
+  template          = file("../modules/aws_ecs/image.json")
   vars = {
     container_image = local.container_image
     container_port  = var.container_port
@@ -24,17 +24,17 @@ resource "aws_ecs_service" "main" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    security_groups  = [aws_security_group.ecs_tasks.id]
-    subnets          = aws_subnet.private.*.id
+    security_groups  = var.security_group
+    subnets          = var.private_subnets
     assign_public_ip = true
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.main.id
+    target_group_arn = var.aws_alb_target_group
     container_name   = "${var.app_name}-${var.environment}-app"
     container_port   = var.container_port
   }
-  depends_on = [aws_alb_listener.http, aws_iam_role.ecs_task_execution_role]
+  depends_on = [var.aws_alb_listener, aws_iam_role.ecs_task_execution_role]
 }
 
 resource "aws_ecs_task_definition" "main" {

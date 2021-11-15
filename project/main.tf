@@ -31,7 +31,7 @@ module "alb" {
   vpc_id              = module.vpc.vpc_id
   public_subnets      = module.vpc.public_subnet_ids
   environment         = var.environment
-  alb_security_groups = [module.security_groups.alb]
+  alb_security_groups = module.security_groups.alb
   health_check_path   = var.health_check_path
 }
 
@@ -46,12 +46,12 @@ module "ecs" {
   aws_region                  = var.aws_region
   environment                 = var.environment
   app_name                    = var.app_name
-  vpc_id                      = module.vpc.vpc_id
   private_subnets             = module.vpc.private_subnet_ids
   app_count                   = var.app_count
-  aws_alb_target_group_arn    = module.alb.aws_alb_target_group_arn
-  ecs_service_security_groups = [module.security_groups.ecs_tasks]
+  aws_alb_target_group        = module.alb.aws_alb_target_group_arn
+  security_group              = module.security_groups.ecs_tasks
+  aws_alb_listener            = module.alb.aws_alb_listener
   container_port              = var.container_port
-  container_image             = var.container_image
-  aws_ecr_repository_url      = module.ecr.ecr_repository_url
+  ecr_repository_url          = module.ecr.ecr_repository_url
+  image_tag                   = var.image_tag
 }

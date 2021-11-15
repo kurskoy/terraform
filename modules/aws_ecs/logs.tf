@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_log_group" "main" {
   name              = "${var.app_name}-cloudwatch-log-group"
-  retention_in_days = 10
+  retention_in_days = 5
   tags = {
     Name = "${var.app_name}-cloudwatch-log-group"
   }
